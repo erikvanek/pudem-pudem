@@ -10,14 +10,13 @@ body {
 
 .key {
     width: 10vw;
-    border: 1px solid white;
     height: 10vh;
     display: flex;
     align-items: center;
     justify-content: center;
-    color: #bbb;
+    color: navy;
     font-size: 1.5rem;
-    /* transition: background 2.2s; */
+    border-radius: 0.25rem;
 }
 
 .active {
