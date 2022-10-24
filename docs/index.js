@@ -1,5 +1,5 @@
 (() => {
-  // public/akai-midi-mix.ts
+  // docs/akai-midi-mix.ts
   var faderData = [
     {
       marker: "1",
@@ -66,7 +66,7 @@
   };
   var isAkaiMidiMix = (input) => input.name === "MIDI Mix" && input.manufacturer === "AKAI";
 
-  // public/elektron.ts
+  // docs/elektron.ts
   var onElektronMessage = (e) => {
     const [userAction, controlId, value] = e.data;
     console.log([...e.data]);
@@ -89,7 +89,7 @@
     device.input.onmidimessage = onElektronMessage;
   };
 
-  // public/arturia-key-step.ts
+  // docs/arturia-key-step.ts
   var keys = [
     41,
     42,
@@ -177,7 +177,7 @@
     drawBoxes();
   };
 
-  // public/index.ts
+  // docs/index.ts
   var runWebMidiApi = () => navigator.requestMIDIAccess().then((midiAccess) => {
     console.log("web midi api running");
     for (const entry of midiAccess.inputs) {
