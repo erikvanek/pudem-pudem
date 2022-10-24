@@ -1,0 +1,25 @@
+body {
+    background: navy;
+}
+
+#main {
+    display: flex;
+    gap: 1rem;
+    flex-wrap: wrap;
+}
+
+.key {
+    width: 10vw;
+    border: 1px solid white;
+    height: 10vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #bbb;
+    font-size: 1.5rem;
+    /* transition: background 2.2s; */
+}
+
+.active {
+    background: white;
+}
