@@ -1,12 +1,13 @@
 export type InputDevice = {
     input: WebMidi.MIDIInput;
-    controls: []
-}
+    controls: [];
+};
 
-export type Interaction = 'PushDown' | 'PushUp' | 'Tweak'
+export type Interaction = 'PushDown' | 'PushUp' | 'Tweak';
 
 export type UserEvent = {
     interaction: Interaction | null;
-    controlId: number
-    value: number
-}
+    controlId: number;
+    value: number;
+    timestamp?: number;
+};
