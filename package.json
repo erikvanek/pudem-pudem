@@ -1,0 +1,19 @@
+{
+  "name": "pudem-pudem",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "run": "esbuild public/index.ts --bundle --watch --outfile=public/index.js --sourcemap"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "@types/webaudioapi": "^0.0.27",
+    "@types/webmidi": "^2.0.6",
+    "esbuild": "^0.15.10",
+    "express": "^4.18.2"
+  }
+}
