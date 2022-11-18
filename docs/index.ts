@@ -5,6 +5,7 @@ import {
     isArturiaKeyStep,
     startLoggingArturiaKeyStep,
 } from './arturia-key-step';
+import {runP5} from './p5';
 
 const runWebMidiApi = () =>
     navigator.requestMIDIAccess().then((midiAccess) => {
@@ -22,4 +23,6 @@ const runWebMidiApi = () =>
         }
     }, console.error);
 
-runWebMidiApi();
+// runWebMidiApi();
+
+runP5();
