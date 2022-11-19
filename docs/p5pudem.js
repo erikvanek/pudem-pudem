@@ -59,17 +59,13 @@ const paintLines = (p) => {
     const xOffset = 20
 
     fft.analyze()
-    // setTimeout(() => console.log(spectrum), 5000)
     for (const frequency of frequencies) {
-    //     p.rectMode(p.CENTER);
-    // p.translate(p.width / 2, p.height / 2);
-    // p.translate(p5.Vector.fromAngle(p.millis() / 1000, 40));
+        // UNCOMMENT ME TO HAVE SOME FUN
+        // p.rectMode(p.RADIUS);
+        // p.translate(p5.Vector.fromAngle(p.millis() / 5000, 30));
         const index = frequencies.findIndex(x => x.frequency === frequency.frequency)
         const lineWidth = p.width / numberOfLines
         const barX = lineWidth * index + xOffset
-        // p.fill(255, 255, 255)
-        // p.rect(barX, 50, 10, barHeight)
-        // p.text(frequency.frequency.toString(), barX, 40)
         let energy, previousFrequency;
         if (index > 0) {
             previousFrequency = frequencies[index - 1]
