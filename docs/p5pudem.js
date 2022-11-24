@@ -80,10 +80,20 @@ const paintLines = (p) => {
 
         frequencies[index] = { ...frequencies[index], energy }
         if (energy > 0) {
-            p.fill(128, 64, 128)
-            const barY = remainingSpace / 2;
-            p.rect(barX, barY, 8, adjustedBarHeight)
-            p.fill(256, 128, 256)
+            // UNCOMMENT ME TO HAVE SOME FUN
+        //     p.rectMode(p.RADIUS);
+        // p.translate(p5.Vector.fromAngle(p.millis() / 50000, 2));
+        // p.rotate(p.millis() / p.PI / 10000 )
+        p.fill(128, 64, 128)
+        // console.log(p.millis() % 255)
+        // p.fill(128, 64, Math.round(p.millis() % 255))
+        const barY = remainingSpace / 2;
+        p.rect(barX, barY, 8, adjustedBarHeight)
+        const rColor = Math.round(((p.millis() / 100 % 16) * 16))
+        const gColor = Math.round(((p.millis() / 100 % 64) * 4))
+        const bColor = Math.round((p.millis() / 100 % 128) * 2)
+            // console.log(bColor)
+            p.fill(rColor, gColor, bColor)
             p.rect(barX, barY, 5, adjustedBarHeight)
         }
         // if (energy > 100) {

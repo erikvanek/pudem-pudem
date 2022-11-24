@@ -16622,55 +16622,6 @@
     }
   });
 
-  // docs/akai-midi-mix.ts
-  var faderData = [
-    {
-      marker: "1",
-      id: 19
-    },
-    {
-      marker: "2",
-      id: 23
-    },
-    {
-      marker: "3",
-      id: 27
-    },
-    {
-      marker: "4",
-      id: 31
-    },
-    {
-      marker: "5",
-      id: 49
-    },
-    {
-      marker: "6",
-      id: 53
-    },
-    {
-      marker: "7",
-      id: 57
-    },
-    {
-      marker: "8",
-      id: 61
-    },
-    {
-      marker: "master",
-      id: 62
-    }
-  ];
-  var faders = faderData.map((preset) => ({
-    controlId: preset.id,
-    min: 0,
-    max: 127,
-    marker: preset.marker
-  }));
-
-  // docs/p5.ts
-  var import_p5 = __toESM(require_p5_min());
-
   // node_modules/p5/lib/addons/p5.sound.js
   (function(modules) {
     var installedModules = {};
@@ -19598,8 +19549,8 @@ registerProcessor(processorNames.amplitudeProcessor, AmplitudeProcessor);`;
         }
       }
       var soundfile_SoundFile = function() {
-        function SoundFile(paths, onload, onerror2, whileLoading) {
-          soundfile_classCallCheck(this, SoundFile);
+        function SoundFile2(paths, onload, onerror2, whileLoading) {
+          soundfile_classCallCheck(this, SoundFile2);
           if (typeof paths !== "undefined") {
             if (typeof paths === "string" || typeof paths[0] === "string") {
               var path = p5.prototype._checkFileFormats(paths);
@@ -19653,7 +19604,7 @@ registerProcessor(processorNames.amplitudeProcessor, AmplitudeProcessor);`;
           this.amp = this.setVolume;
           this.fade = this.setVolume;
         }
-        soundfile_createClass(SoundFile, [{
+        soundfile_createClass(SoundFile2, [{
           key: "load",
           value: function load(callback, errorCallback) {
             var self2 = this;
@@ -20316,9 +20267,9 @@ registerProcessor(processorNames.amplitudeProcessor, AmplitudeProcessor);`;
             });
           }
         }]);
-        return SoundFile;
+        return SoundFile2;
       }();
-      function loadSound2(path, callback, onerror2, whileLoading) {
+      function loadSound(path, callback, onerror2, whileLoading) {
         if (window.location.origin.indexOf("file://") > -1 && window.cordova === "undefined") {
           window.alert("This sketch may require a server to load external files. Please see http://bit.ly/1qcInwS");
         }
@@ -20765,27 +20716,27 @@ registerProcessor(processorNames.amplitudeProcessor, AmplitudeProcessor);`;
         }]);
         return FFT;
       }();
-      function freqToFloat(fft2) {
-        if (fft2.freqDomain instanceof Float32Array === false) {
-          fft2.freqDomain = new Float32Array(fft2.analyser.frequencyBinCount);
+      function freqToFloat(fft3) {
+        if (fft3.freqDomain instanceof Float32Array === false) {
+          fft3.freqDomain = new Float32Array(fft3.analyser.frequencyBinCount);
         }
       }
-      function freqToInt(fft2) {
-        if (fft2.freqDomain instanceof Uint8Array === false) {
-          fft2.freqDomain = new Uint8Array(fft2.analyser.frequencyBinCount);
+      function freqToInt(fft3) {
+        if (fft3.freqDomain instanceof Uint8Array === false) {
+          fft3.freqDomain = new Uint8Array(fft3.analyser.frequencyBinCount);
         }
       }
-      function timeToFloat(fft2) {
-        if (fft2.timeDomain instanceof Float32Array === false) {
-          fft2.timeDomain = new Float32Array(fft2.analyser.frequencyBinCount);
+      function timeToFloat(fft3) {
+        if (fft3.timeDomain instanceof Float32Array === false) {
+          fft3.timeDomain = new Float32Array(fft3.analyser.frequencyBinCount);
         }
       }
-      function timeToInt(fft2) {
-        if (fft2.timeDomain instanceof Uint8Array === false) {
-          fft2.timeDomain = new Uint8Array(fft2.analyser.frequencyBinCount);
+      function timeToInt(fft3) {
+        if (fft3.timeDomain instanceof Uint8Array === false) {
+          fft3.timeDomain = new Uint8Array(fft3.analyser.frequencyBinCount);
         }
       }
-      var fft = fft_FFT;
+      var fft2 = fft_FFT;
       var Add = __webpack_require__(4);
       var Add_default = __webpack_require__.n(Add);
       var Multiply = __webpack_require__(1);
@@ -25337,10 +25288,10 @@ registerProcessor(processorNames.amplitudeProcessor, AmplitudeProcessor);`;
       p5.prototype.registerMethod("remove", p5.prototype.disposeSound);
       p5.Panner = panner_0;
       p5.SoundFile = soundfile;
-      p5.prototype.loadSound = loadSound2;
+      p5.prototype.loadSound = loadSound;
       p5.prototype.registerPreloadMethod("loadSound", p5.prototype);
       p5.Amplitude = amplitude;
-      p5.FFT = fft;
+      p5.FFT = fft2;
       p5.Oscillator = oscillator;
       p5.SinOsc = SinOsc;
       p5.TriOsc = TriOsc;
@@ -25382,39 +25333,108 @@ registerProcessor(processorNames.amplitudeProcessor, AmplitudeProcessor);`;
   ]);
 
   // docs/p5.ts
-  globalThis.p5 = import_p5.default;
-  console.log(globalThis.p5);
-  var init = () => {
+  var import_p52 = __toESM(require_p5_min(), 1);
+  var song;
+  var loaded;
+  var fft;
+  var mic;
+  var playingFromFile = false;
+  var frequencies;
+  var numberOfLines = 32;
+  var setupFromFile = (p) => {
+    song = p.loadSound("eleonora.mp3", () => {
+      loaded = true;
+      fft = new import_p52.default.FFT();
+    });
+  };
+  var setupFromMic = () => {
+    mic = new import_p52.default.AudioIn();
+    mic.start();
+    fft = new import_p52.default.FFT();
+    fft.setInput(mic);
+    loaded = true;
+  };
+  var p5Init = () => {
     const sketch = (p) => {
-      let song, loaded;
       p.setup = () => {
-        p.createCanvas(window.innerWidth, window.innerHeight);
+        p.createCanvas(p.windowWidth, p.windowHeight);
         p.background(40);
-      };
-      song = loadSound("eleonora.mp3", () => loaded = true);
-      p.mousePressed = () => {
-        console.log("now");
-        if (!song.isPlaying() && loaded) {
-          song.play();
+        playingFromFile ? setupFromFile(p) : setupFromMic();
+        const audibleMin = 20;
+        const audibleMax = 1e4;
+        frequencies = [];
+        for (let index = 0; index < numberOfLines; index++) {
+          frequencies.push({
+            frequency: Math.floor(
+              (audibleMax - audibleMin) / numberOfLines * index
+            ),
+            energy: 0
+          });
         }
       };
       p.draw = () => {
-        p.ellipse(p.mouseX, p.mouseY, 20, 20);
-        p.rect(p.mouseY, p.mouseX + 20, 50, 50);
-        if (p.mouseIsPressed) {
-          p.fill(128);
-        } else {
-          p.fill(64);
+        if (loaded) {
+          p.background(220);
+          paintLines(p);
+          p.text("tap to play", 20, 20);
         }
       };
+      p.mousePressed = playingFromFile ? () => fileMousePresesd(song, loaded) : () => micMousePressed(p);
     };
-    const s = new import_p5.default(sketch);
+    new import_p52.default(sketch);
+  };
+  var paintLines = (p) => {
+    let fullBarHeight = p.height - 80;
+    const xOffset = 20;
+    fft.analyze();
+    for (const frequency of frequencies) {
+      const index = frequencies.findIndex(
+        (x) => x.frequency === frequency.frequency
+      );
+      const lineWidth = p.width / numberOfLines;
+      const barX = lineWidth * index + xOffset;
+      let energy, previousFrequency;
+      if (index > 0) {
+        previousFrequency = frequencies[index - 1];
+      }
+      if (previousFrequency) {
+        energy = fft.getEnergy(
+          frequency.frequency,
+          previousFrequency.frequency
+        );
+      } else {
+        energy = fft.getEnergy(frequency.frequency);
+      }
+      const adjustedBarHeight = fullBarHeight * (energy / 255);
+      const remainingSpace = p.height - adjustedBarHeight;
+      frequencies[index] = { ...frequencies[index], energy };
+      if (energy > 0) {
+        p.fill(128, 64, 128);
+        const barY = remainingSpace / 2;
+        p.rect(barX, barY, 8, adjustedBarHeight);
+        p.fill(256, 128, 256);
+        p.rect(barX, barY, 5, adjustedBarHeight);
+      }
+    }
+  };
+  var fileMousePresesd = (song2, loaded2) => {
+    if (!song2.isPlaying() && loaded2) {
+      song2.play();
+    } else if (song2.isPlaying()) {
+      song2.pause();
+    }
+  };
+  var micMousePressed = (p) => {
+    p.getAudioContext().resume();
   };
   var runP5 = () => {
-    init();
+    p5Init();
   };
+  runP5();
 
   // docs/index.ts
+  p5 = "yo";
+  console.log(globalThis.p5);
   runP5();
 })();
 /*! p5.js v1.5.0 October 18, 2022 */

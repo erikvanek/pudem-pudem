@@ -1,86 +1,161 @@
-// import 'p5'
-// console.log(p5)
-import p5 from './p5/lib/index'
-globalThis.p5 = p5
-console.log(globalThis.p5)
-// import 'p5/lib/addons/p5.sound'
-// (window as any).p5 = p5;
-// import 'p5/lib/addons/p5.sound'
-// import SoundFile from 'p5';
-// import p5 from 'p5';
-// import  from 'p5';
+import 'p5/lib/addons/p5.sound';
+import p5, { SoundFile } from 'p5';
+let song: SoundFile,
+    loaded: boolean,
+    fft: p5.FFT,
+    mic,
+    playingFromFile = false,
+    frequencies: { frequency: number; energy: number }[],
+    numberOfLines = 32;
 
-// import {SoundFile, loadSound} from 'p5/lib/addons/p5.sound';
-// console.log(p5)
-// import {SoundFile} from 'p5/lib/addons/p5.sound';
-// import {p5Sound} from 'p5/lib/addons/p5.sound';
-// import {SoundFile} from 'p5';
+const setupFromFile = (p: p5) => {
+    song = p.loadSound('eleonora.mp3', () => {
+        loaded = true;
+        fft = new p5.FFT();
+    });
+};
 
+const setupFromMic = () => {
+    mic = new p5.AudioIn();
+    mic.start();
+    fft = new p5.FFT();
+    fft.setInput(mic);
+    loaded = true;
+};
 
-const init = () => {
+const p5Init = () => {
     const sketch = (p: p5) => {
-        let song, loaded;
         p.setup = () => {
-            p.createCanvas(window.innerWidth, window.innerHeight);
+            p.createCanvas(p.windowWidth, p.windowHeight);
             p.background(40);
-            // const s = new SoundFile('eleonora.mp3', (s) => console.log(s))
-            // console.log(s)
-            // s.play()
-            // new SoundFile('')
-            // SoundFile
-            // console.log(p5Sound)
-            // p.loadSound('eleonora.mp3', (e) => console.log(e))
-            // const sound = (p as p5.SoundFile).loadSound('eleonora.mp3')
-            // sound.play()
-            // const loadSound = (path: string) => ((p as any) as p5.SoundFile).loadSound(path);
-            // const s: SoundFile = new SoundFile('yo')
-            // console.log(s)
-            // const yo = new s('eleonora.mp3');
-            // s.play()
-            // const bloopOne = loadSound('eleonora.mp3');
-            // bloopOne.play()
-            // p5.loadSound('')
-            // p.loadJSON()
-            // loadSound('eleonora.mp3', console.log)
-        };
+            playingFromFile ? setupFromFile(p) : setupFromMic();
 
-        song = loadSound('eleonora.mp3', () => (loaded = true));
+            const audibleMin = 20;
+            // const audibleMax = 20000;
+            const audibleMax = 10000;
+            frequencies = [];
 
-        p.mousePressed = () => {
-            console.log('now');
-            if (!song.isPlaying() && loaded) {
-                song.play();
+            for (let index = 0; index < numberOfLines; index++) {
+                frequencies.push({
+                    frequency: Math.floor(
+                        ((audibleMax - audibleMin) / numberOfLines) * index
+                    ),
+                    energy: 0,
+                });
             }
+
+            // console.log(frequencies);
         };
 
         p.draw = () => {
-            p.ellipse(p.mouseX, p.mouseY, 20, 20);
-            p.rect(p.mouseY, p.mouseX + 20, 50, 50);
-            if (p.mouseIsPressed) {
-                p.fill(128);
-            } else {
-                p.fill(64);
+            if (loaded) {
+                p.background(220);
+                // paintWaveForm(p)
+                // paintSpectrum(p)
+                paintLines(p);
+                p.text('tap to play', 20, 20);
             }
         };
 
-        // p.loadBytes
-
-        // let wut = p5.SoundFile
-        // wut.load
-
-        // p.preload = () => {
-        //     // p5Sound
-        //     p5Sound.loadSound('assets/beat.mp3');
-
-        // }
+        p.mousePressed = playingFromFile
+            ? () => fileMousePresesd(song, loaded)
+            : () => micMousePressed(p);
     };
 
-    const s = new p5(sketch);
-    // p5.loadSound('eleonora.mp3')
-    // const f = new SoundFile('eleonora.mp3', console.log);
-    // console.log(window.loadSound)
+    new p5(sketch);
+};
+
+const paintLines = (p: p5) => {
+    let fullBarHeight = p.height - 80;
+    const xOffset = 20;
+
+    fft.analyze();
+    for (const frequency of frequencies) {
+        // UNCOMMENT ME TO HAVE SOME FUN
+        // p.rectMode(p.RADIUS);
+        // p.translate(p5.Vector.fromAngle(p.millis() / 5000, 30));
+        const index = frequencies.findIndex(
+            (x) => x.frequency === frequency.frequency
+        );
+        const lineWidth = p.width / numberOfLines;
+        const barX = lineWidth * index + xOffset;
+        let energy, previousFrequency;
+        if (index > 0) {
+            previousFrequency = frequencies[index - 1];
+        }
+        if (previousFrequency) {
+            energy = fft.getEnergy(
+                frequency.frequency,
+                previousFrequency.frequency
+            );
+        } else {
+            energy = fft.getEnergy(frequency.frequency);
+        }
+        const adjustedBarHeight = fullBarHeight * (energy / 255);
+        const remainingSpace = p.height - adjustedBarHeight;
+
+        frequencies[index] = { ...frequencies[index], energy };
+        if (energy > 0) {
+            p.fill(128, 64, 128);
+            const barY = remainingSpace / 2;
+            p.rect(barX, barY, 8, adjustedBarHeight);
+            p.fill(256, 128, 256);
+            p.rect(barX, barY, 5, adjustedBarHeight);
+        }
+        // if (energy > 100) {
+        //     // console.log(index)
+        //     console.log(frequencies[index])
+        //     // console.log(frequencies)
+        // }
+        // console.log(frequencies)
+    }
+};
+
+const paintSpectrum = (p: p5) => {
+    let spectrum = fft.analyze();
+    p.noStroke();
+    p.fill(255, 0, 255);
+    for (let i = 0; i < spectrum.length; i++) {
+        let x = p.map(i, 0, spectrum.length, 0, p.width);
+        let h = -p.height + p.map(spectrum[i], 0, 255, p.height, 0);
+        p.rect(x, p.height, p.width / spectrum.length, h);
+    }
+
+    p.noFill();
+    p.stroke(20);
+
+    for (let i = 0; i < spectrum.length; i++) {
+        let x = p.map(i, 0, spectrum.length, 0, p.width);
+        let h = -p.height + p.map(spectrum[i], 0, 255, p.height, 128);
+        p.rect(x, p.height, p.width / spectrum.length, h);
+    }
+};
+
+const paintWaveForm = (p: p5) => {
+    let waveform = fft.waveform();
+    p.beginShape();
+    for (let i = 0; i < waveform.length; i++) {
+        let x = p.map(i, 0, waveform.length, 0, p.width);
+        let y = p.map(waveform[i], -1, 1, 0, p.height);
+        p.vertex(x, y);
+    }
+    p.endShape();
+};
+
+const fileMousePresesd = (song: p5.SoundFile, loaded: boolean) => {
+    if (!song.isPlaying() && loaded) {
+        song.play();
+    } else if (song.isPlaying()) {
+        song.pause();
+    }
+};
+
+const micMousePressed = (p: p5) => {
+    (p.getAudioContext() as any).resume();
 };
 
 export const runP5 = () => {
-    init();
+    p5Init();
 };
+
+runP5();
