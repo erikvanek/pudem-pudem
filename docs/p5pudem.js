@@ -1,155 +1,108 @@
-let song, loaded, fft, mic, playingFromFile = false, frequencies, numberOfLines = 32;
+import { drawBars } from './bars.js';
+import { drawNovation } from './novation.js';
+
+let song,
+    loaded,
+    fft,
+    mic,
+    playingFromFile = false,
+    frequencies,
+    numberOfLines = 32,
+    preset = 'novation',
+    interacted = false;
 
 const setupFromFile = (p) => {
-
     song = p.loadSound('eleonora.mp3', () => {
-        loaded = true; fft = new p5.FFT();
+        loaded = true;
+        fft = new p5.FFT();
         // song.amp(0.8);
-    })
-}
+    });
+};
 
 const setupFromMic = () => {
     mic = new p5.AudioIn();
     mic.start();
     fft = new p5.FFT();
     fft.setInput(mic);
-    loaded = true
-}
+    loaded = true;
+};
 
-const p5Init = () => {
+const novationInit = () => {
+    const sketch = (p) => {
+        p.setup = () => {};
+    };
+    new p5(sketch);
+};
+
+const sketchInit = () => {
     const sketch = (p) => {
         p.setup = () => {
-            p.createCanvas(window.innerWidth, window.innerHeight);
+            p.createCanvas(window.innerWidth, window.innerHeight, p.WEBGL);
+            // init for bars preset
+            // p.createCanvas(window.innerWidth, window.innerHeight);
             p.background(40);
-            playingFromFile ?
-                setupFromFile(p)
-                : setupFromMic()
+            p.frameRate(60);
+            playingFromFile ? setupFromFile(p) : setupFromMic();
 
-            const audibleMin = 20
+            const audibleMin = 20;
             // const audibleMax = 20000;
             const audibleMax = 10000;
-            frequencies = []
+            frequencies = [];
 
             for (let index = 0; index < numberOfLines; index++) {
-                frequencies.push({ frequency: Math.floor((audibleMax - audibleMin) / numberOfLines * index), energy: 0 })
+                frequencies.push({
+                    frequency: Math.floor(
+                        ((audibleMax - audibleMin) / numberOfLines) * index
+                    ),
+                    energy: 0,
+                });
             }
-
-            console.log(frequencies)
         };
 
         p.draw = () => {
             if (loaded) {
-                p.background(220);
-                // paintWaveForm(p)
-                // paintSpectrum(p)
-                paintLines(p)
+                if (preset === 'bars') {
+                    drawBars(p, fft, frequencies, numberOfLines);
+                } else if (preset === 'novation') {
+                    drawNovation(p);
+                }
+            }
+            if (!interacted) {
                 p.text('tap to play', 20, 20);
             }
         };
 
-        p.mousePressed = playingFromFile ? () => fileMousePresesd(song, loaded) : () => micMousePressed(p)
+        p.mousePressed = playingFromFile
+            ? () => fileMousePresesd(song, loaded)
+            : () => micMousePressed(p);
     };
 
     new p5(sketch);
 };
 
-const paintLines = (p) => {
-
-    let fullBarHeight = p.height - 80;
-    const xOffset = 20
-
-    fft.analyze()
-    for (const frequency of frequencies) {
-        // UNCOMMENT ME TO HAVE SOME FUN
-        // p.rectMode(p.RADIUS);
-        // p.translate(p5.Vector.fromAngle(p.millis() / 5000, 30));
-        const index = frequencies.findIndex(x => x.frequency === frequency.frequency)
-        const lineWidth = p.width / numberOfLines
-        const barX = lineWidth * index + xOffset
-        let energy, previousFrequency;
-        if (index > 0) {
-            previousFrequency = frequencies[index - 1]
-        }
-        if (previousFrequency) {
-            energy = fft.getEnergy(frequency.frequency, previousFrequency.frequency)
-        } else {
-            energy = fft.getEnergy(frequency.frequency)
-        }
-        const adjustedBarHeight = fullBarHeight * (energy / 255)
-        const remainingSpace = p.height - adjustedBarHeight;
-
-        frequencies[index] = { ...frequencies[index], energy }
-        if (energy > 0) {
-            // UNCOMMENT ME TO HAVE SOME FUN
-        //     p.rectMode(p.RADIUS);
-        // p.translate(p5.Vector.fromAngle(p.millis() / 50000, 2));
-        // p.rotate(p.millis() / p.PI / 10000 )
-        p.fill(128, 64, 128)
-        // console.log(p.millis() % 255)
-        // p.fill(128, 64, Math.round(p.millis() % 255))
-        const barY = remainingSpace / 2;
-        p.rect(barX, barY, 8, adjustedBarHeight)
-        const rColor = Math.round(((p.millis() / 100 % 16) * 16))
-        const gColor = Math.round(((p.millis() / 100 % 64) * 4))
-        const bColor = Math.round((p.millis() / 100 % 128) * 2)
-            // console.log(bColor)
-            p.fill(rColor, gColor, bColor)
-            p.rect(barX, barY, 5, adjustedBarHeight)
-        }
-        // if (energy > 100) {
-        //     // console.log(index)
-        //     console.log(frequencies[index])
-        //     // console.log(frequencies)
-        // }
-        // console.log(frequencies)
-    }
-}
-
-const paintSpectrum = (p) => {
-    let spectrum = fft.analyze();
-    p.noStroke();
-    p.fill(255, 0, 255);
-    for (let i = 0; i < spectrum.length; i++) {
-        let x = p.map(i, 0, spectrum.length, 0, p.width);
-        let h = -p.height + p.map(spectrum[i], 0, 255, p.height, 0);
-        p.rect(x, p.height, p.width / spectrum.length, h)
-    }
-
-    p.noFill();
-    p.stroke(20);
-
-    for (let i = 0; i < spectrum.length; i++) {
-        let x = p.map(i, 0, spectrum.length, 0, p.width);
-        let h = -p.height + p.map(spectrum[i], 0, 255, p.height, 128);
-        p.rect(x, p.height, p.width / spectrum.length, h)
-    }
-}
-
-const paintWaveForm = (p) => {
-    let waveform = fft.waveform();
-    p.beginShape();
-    for (let i = 0; i < waveform.length; i++) {
-        let x = p.map(i, 0, waveform.length, 0, p.width);
-        let y = p.map(waveform[i], -1, 1, 0, p.height);
-        p.vertex(x, y);
-    }
-    p.endShape();
-}
-
 const fileMousePresesd = (song, loaded) => {
     if (!song.isPlaying() && loaded) {
-        song.play()
+        song.play();
     } else if (song.isPlaying()) {
-        song.pause()
+        song.pause();
     }
-}
+    interacted = true;
+};
 
 const micMousePressed = (p) => {
     p.getAudioContext().resume();
-}
-
-const runP5 = () => {
-    p5Init();
+    interacted = true;
 };
 
-runP5()
+const runP5 = () => {
+    document.addEventListener('DOMContentLoaded', () => {
+        sketchInit();
+        const select = document.getElementsByTagName('select')[0];
+        select.addEventListener('change', (c) => {
+            const { value } = c.target;
+            preset = value;
+        });
+    });
+};
+
+runP5();

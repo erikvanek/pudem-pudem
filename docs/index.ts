@@ -9,8 +9,8 @@ import 'p5/lib/addons/p5.sound';
 // import p5, { SoundFile } from 'p5';
 import {runP5} from './p5';
 
-p5 = 'yo'
-console.log(globalThis.p5)
+// p5 = 'yo'
+console.log('wtf')
 
 // const runWebMidiApi = () =>
 //     navigator.requestMIDIAccess().then((midiAccess) => {

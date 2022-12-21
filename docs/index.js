@@ -21781,8 +21781,8 @@ registerProcessor(processorNames.amplitudeProcessor, AmplitudeProcessor);`;
       }
       main.inputSources = [];
       var audioin_AudioIn = function() {
-        function AudioIn(errorCallback) {
-          audioin_classCallCheck(this, AudioIn);
+        function AudioIn2(errorCallback) {
+          audioin_classCallCheck(this, AudioIn2);
           this.input = main.audiocontext.createGain();
           this.output = main.audiocontext.createGain();
           this.stream = null;
@@ -21796,7 +21796,7 @@ registerProcessor(processorNames.amplitudeProcessor, AmplitudeProcessor);`;
           }
           main.soundArray.push(this);
         }
-        audioin_createClass(AudioIn, [{
+        audioin_createClass(AudioIn2, [{
           key: "start",
           value: function start(successCallback, errorCallback) {
             var self2 = this;
@@ -21936,7 +21936,7 @@ registerProcessor(processorNames.amplitudeProcessor, AmplitudeProcessor);`;
             delete this.output;
           }
         }]);
-        return AudioIn;
+        return AudioIn2;
       }();
       var audioin = audioin_AudioIn;
       var CrossFade = __webpack_require__(23);
@@ -25347,8 +25347,9 @@ registerProcessor(processorNames.amplitudeProcessor, AmplitudeProcessor);`;
       fft = new import_p52.default.FFT();
     });
   };
-  var setupFromMic = () => {
-    mic = new import_p52.default.AudioIn();
+  var setupFromMic = (_) => {
+    mic = new import_p52.AudioIn();
+    mic = {};
     mic.start();
     fft = new import_p52.default.FFT();
     fft.setInput(mic);
@@ -25357,9 +25358,10 @@ registerProcessor(processorNames.amplitudeProcessor, AmplitudeProcessor);`;
   var p5Init = () => {
     const sketch = (p) => {
       p.setup = () => {
+        console.log(p.createCanvas);
         p.createCanvas(p.windowWidth, p.windowHeight);
         p.background(40);
-        playingFromFile ? setupFromFile(p) : setupFromMic();
+        playingFromFile ? setupFromFile(p) : setupFromMic(p);
         const audibleMin = 20;
         const audibleMax = 1e4;
         frequencies = [];
@@ -25433,8 +25435,7 @@ registerProcessor(processorNames.amplitudeProcessor, AmplitudeProcessor);`;
   runP5();
 
   // docs/index.ts
-  p5 = "yo";
-  console.log(globalThis.p5);
+  console.log("wtf");
   runP5();
 })();
 /*! p5.js v1.5.0 October 18, 2022 */

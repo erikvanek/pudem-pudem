@@ -1,74 +1,4 @@
-import 'p5/lib/addons/p5.sound';
-import p5, { AudioIn, SoundFile } from 'p5';
-let song: SoundFile,
-    loaded: boolean,
-    fft: p5.FFT,
-    mic,
-    playingFromFile = false,
-    frequencies: { frequency: number; energy: number }[],
-    numberOfLines = 32;
-
-const setupFromFile = (p: p5) => {
-    song = p.loadSound('eleonora.mp3', () => {
-        loaded = true;
-        fft = new p5.FFT();
-    });
-};
-
-const setupFromMic = (_) => {
-    mic = new AudioIn();
-    mic = {} as AudioIn;
-    // console.log(mic)
-    mic.start();
-    fft = new p5.FFT();
-    fft.setInput(mic);
-    loaded = true;
-};
-
-const p5Init = () => {
-    const sketch = (p: p5) => {
-        p.setup = () => {
-            console.log(p.createCanvas);
-            p.createCanvas(p.windowWidth, p.windowHeight);
-            p.background(40);
-            playingFromFile ? setupFromFile(p) : setupFromMic(p);
-
-            const audibleMin = 20;
-            // const audibleMax = 20000;
-            const audibleMax = 10000;
-            frequencies = [];
-
-            for (let index = 0; index < numberOfLines; index++) {
-                frequencies.push({
-                    frequency: Math.floor(
-                        ((audibleMax - audibleMin) / numberOfLines) * index
-                    ),
-                    energy: 0,
-                });
-            }
-
-            // console.log(frequencies);
-        };
-
-        p.draw = () => {
-            if (loaded) {
-                p.background(220);
-                // paintWaveForm(p)
-                // paintSpectrum(p)
-                paintLines(p);
-                p.text('tap to play', 20, 20);
-            }
-        };
-
-        p.mousePressed = playingFromFile
-            ? () => fileMousePresesd(song, loaded)
-            : () => micMousePressed(p);
-    };
-
-    new p5(sketch);
-};
-
-const paintLines = (p: p5) => {
+export const paintLines = (p, fft, frequencies, numberOfLines) => {
     let fullBarHeight = p.height - 80;
     const xOffset = 20;
 
@@ -99,10 +29,20 @@ const paintLines = (p: p5) => {
 
         frequencies[index] = { ...frequencies[index], energy };
         if (energy > 0) {
+            // UNCOMMENT ME TO HAVE SOME FUN
+            //     p.rectMode(p.RADIUS);
+            // p.translate(p5.Vector.fromAngle(p.millis() / 50000, 2));
+            // p.rotate(p.millis() / p.PI / 10000 )
             p.fill(128, 64, 128);
+            // console.log(p.millis() % 255)
+            // p.fill(128, 64, Math.round(p.millis() % 255))
             const barY = remainingSpace / 2;
             p.rect(barX, barY, 8, adjustedBarHeight);
-            p.fill(256, 128, 256);
+            const rColor = Math.round(((p.millis() / 100) % 16) * 16);
+            const gColor = Math.round(((p.millis() / 100) % 64) * 4);
+            const bColor = Math.round(((p.millis() / 100) % 128) * 2);
+            // console.log(bColor)
+            p.fill(rColor, gColor, bColor);
             p.rect(barX, barY, 5, adjustedBarHeight);
         }
         // if (energy > 100) {
@@ -114,7 +54,14 @@ const paintLines = (p: p5) => {
     }
 };
 
-const paintSpectrum = (p: p5) => {
+export const drawBars = (p, fft, frequencies, numberOfLines) => {
+    p.background(220);
+    paintWaveForm(p, fft);
+    paintSpectrum(p, fft);
+    paintLines(p, fft, frequencies, numberOfLines);
+};
+
+export const paintSpectrum = (p, fft) => {
     let spectrum = fft.analyze();
     p.noStroke();
     p.fill(255, 0, 255);
@@ -134,7 +81,7 @@ const paintSpectrum = (p: p5) => {
     }
 };
 
-const paintWaveForm = (p: p5) => {
+export const paintWaveForm = (p, fft) => {
     let waveform = fft.waveform();
     p.beginShape();
     for (let i = 0; i < waveform.length; i++) {
@@ -144,21 +91,3 @@ const paintWaveForm = (p: p5) => {
     }
     p.endShape();
 };
-
-const fileMousePresesd = (song: p5.SoundFile, loaded: boolean) => {
-    if (!song.isPlaying() && loaded) {
-        song.play();
-    } else if (song.isPlaying()) {
-        song.pause();
-    }
-};
-
-const micMousePressed = (p: p5) => {
-    (p.getAudioContext() as any).resume();
-};
-
-export const runP5 = () => {
-    p5Init();
-};
-
-runP5();
