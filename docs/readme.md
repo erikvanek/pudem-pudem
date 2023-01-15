@@ -18,3 +18,4 @@
 
 -   migrate to Typescript
 -   some groundwork is done but type definitions seem to be problematic with `p5/sound` package
+- reuse `initController` method

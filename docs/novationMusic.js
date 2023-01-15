@@ -59,36 +59,70 @@ const initController = () => {
     }
 };
 
-export const drawNovation = (p) => {
+export const drawNovationMusic = (p, fft, mic) => {
     initController();
-    draw3DObjects(p);
+    draw3DObjects(p, fft, mic);
 };
 
+const eighty = 80;
+const oneSixty = 160;
+const threeTwenty = 320;
+const fourFourty = 440;
+const sixFourty = 640;
+const oneK = 1280;
+const twoK = 2560;
+// const frequencies = [20, 40, 80, 160, 320, 640, 1280, 2560, 5120, 12400];
+
+const frequencies = new Map([
+    [eighty, null],
+    [oneSixty, null],
+    [threeTwenty, null],
+    [fourFourty, null],
+    [sixFourty, null],
+    [oneK, null],
+    [twoK, null],
+]);
+
 const maxFaderValue = 128;
-const draw3DObjects = (p) => {
+const draw3DObjects = (p, fft, mic) => {
     if (sketchClearPressed) {
         p.clear();
         sketchClearPressed = false;
     }
-    const { rotateX, rotateY, rotateZ } = rotation;
-    if (rotateX) {
-        p.rotateX(
-            (((rotateX / maxFaderValue) * p.millis()) / 100) *
-                rotationFactorFader
-        );
+    const bars = fft.analyze();
+
+    let data = '';
+    for (const frequency of frequencies.keys()) {
+        const f = fft.getEnergy(frequency);
+        // data += `${frequency}: ${f}; `;
+        frequencies.set(frequency, f);
     }
-    if (rotateY) {
-        p.rotateY(
-            (((rotateY / maxFaderValue) * p.millis()) / 100) *
-                rotationFactorFader
-        );
-    }
-    if (rotateZ) {
-        p.rotateZ(
-            (((rotateZ / maxFaderValue) * p.millis()) / 100) *
-                rotationFactorFader
-        );
-    }
+
+    // const bpm = mic.getBPM()
+    // console.log(bars)
+
+    const threeTwentyEnergy = frequencies.get(threeTwenty);
+    const oneSixtyEnergy = frequencies.get(threeTwenty);
+    const eightyEnergy = frequencies.get(threeTwenty);
+
+    // console.log(threeTwentyEnergy, oneSixtyEnergy, eightyEnergy)
+    const duration = (p.millis() / 1000)
+    // console.log(duration)
+    // const rotationn = (duration * (255 - (255 % eightyEnergy)) % 255) / 255;
+    // console.log(rotationn)
+    // p.rotateZ(rotation)
+
+    // const { rotateX, rotateY, rotateZ } = rotation;
+    // if (rotateX) {
+    // p.rotateX((maxFaderValue * 2) % threeTwentyEnergy * p.millis() / 100000);
+    // }
+    // if (rotateY) {
+    // p.rotateY((maxFaderValue * 2) % oneSixtyEnergy * p.millis() / 100000);
+    // }
+    // if (rotateZ) {
+    // p.rotateZ((maxFaderValue * 2) % eightyEnergy * p.millis() / 100000);
+
+    // }
     // p.rotateX(p.millis() / 1000);
     // p.noStroke();
     // const millis = (-(Math.round((p.millis() / 1000) % 255) - 255) * 2) % 255;
@@ -98,18 +132,43 @@ const draw3DObjects = (p) => {
     //     p.color(16, 128, 16)
     // );
     // p.fill(p.color((millis % 255) * 4, millis, (millis % 255) * 4));
-    p.stroke(
-        invertStrokePressed ? 255 - rgb.r : rgb.r,
-        invertStrokePressed ? 255 - rgb.g : rgb.g,
-        invertStrokePressed ? 255 - rgb.b : rgb.b,
-        invertStrokePressed
-            ? -(255 / transparencyFader - 255)
-            : transparencyFader
-    );
-    // p.fill(rgb.r, rgb.g, rgb.b, (transparencyFader * 2) % 255);
-    p.fill(rgb.r, rgb.g, rgb.b, (transparencyFader / 4) % 255);
-    // console.log(rgb, transparencyFader);
-    p.sphere(Math.min(p.width / 3, p.height / 3) * sizeFactorFader, 8, 3);
+    // p.stroke(
+    //     invertStrokePressed ? 255 - rgb.r : rgb.r,
+    //     invertStrokePressed ? 255 - rgb.g : rgb.g,
+    //     invertStrokePressed ? 255 - rgb.b : rgb.b,
+    //     invertStrokePressed
+    //         ? -(255 / transparencyFader - 255)
+    //         : transparencyFader
+    // );
+    // p.fill(rgb.r, rgb.g, rgb.b, (transparencyFader / 4) % 255);
+
+    const rStroke = threeTwentyEnergy;
+    const gStroke = oneSixtyEnergy;
+    const bStroke = eightyEnergy;
+    // p.noFill();
+    // p.lights()
+    // p.ambientLight(128);
+    // p.specularColor(128, 32, 16);
+    // p.specularMaterial(150);
+    // const lightPosX = p.mouseX - p.width / 2;
+    // const lightPosY = p.mouseY - p.height / 2;
+    // p.spotLight(0, 250, 0, lightPosX, lightPosY, 100, 0, 0, -1, Math.PI / 16);
+    // // p.pointLight(200, 200, 200, lightPosX, lightPosY, 50); //
+    // p.shininess(50);
+    // p.strokeWeight(8);
+    p.stroke(rgb.r, rgb.g, rgb.b, transparencyFader);
+
+    const rFill = frequencies.get(fourFourty);
+    const gFill = frequencies.get(sixFourty);
+    const bFill = frequencies.get(oneK);
+    const transFil = frequencies.get(twoK);
+    p.fill(rFill, gFill, bFill, transparencyFader);
+
+    // console.log(frequencies.get(eighty));
+    // const otherSizeFactor = sizeFactorFader;
+    const otherSizeFactor = ((255 * 3) % (rStroke + gStroke + bStroke)) / 100;
+
+    p.sphere(Math.min(p.width / 3, p.height / 3) * otherSizeFactor, 8, 3);
 };
 
 const objectMap = new Map([

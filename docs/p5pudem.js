@@ -1,5 +1,6 @@
 import { drawBars } from './bars.js';
 import { drawNovation } from './novation.js';
+import { drawNovationMusic } from './novationMusic.js';
 
 let song,
     loaded,
@@ -8,7 +9,7 @@ let song,
     playingFromFile = false,
     frequencies,
     numberOfLines = 32,
-    preset = 'novation',
+    preset = 'novationMusic',
     interacted = false;
 
 const setupFromFile = (p) => {
@@ -61,10 +62,13 @@ const sketchInit = () => {
 
         p.draw = () => {
             if (loaded) {
+                // console.log(preset)
                 if (preset === 'bars') {
                     drawBars(p, fft, frequencies, numberOfLines);
                 } else if (preset === 'novation') {
                     drawNovation(p);
+                } else if (preset === 'novationMusic') {
+                    drawNovationMusic(p, fft, mic);
                 }
             }
             if (!interacted) {
