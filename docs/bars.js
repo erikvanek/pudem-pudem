@@ -56,8 +56,8 @@ export const paintLines = (p, fft, frequencies, numberOfLines) => {
 
 export const drawBars = (p, fft, frequencies, numberOfLines) => {
     p.background(220);
-    paintWaveForm(p, fft);
-    paintSpectrum(p, fft);
+    // paintWaveForm(p, fft);
+    // paintSpectrum(p, fft);
     paintLines(p, fft, frequencies, numberOfLines);
 };
 
