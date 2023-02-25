@@ -10,7 +10,7 @@ let song,
     playingFromFile = false,
     frequencies,
     numberOfLines = 32,
-    preset = 'church',
+    preset = 'bars',
     interacted = false;
 
 const setupFromFile = (p) => {
@@ -63,7 +63,7 @@ const sketchInit = () => {
 
         p.draw = () => {
             if (loaded) {
-                // console.log(preset)
+                console.log(preset)
                 if (preset === 'bars') {
                     drawBars(p, fft, frequencies, numberOfLines);
                 } else if (preset === 'novation') {

@@ -41,8 +41,9 @@ const rgb = {
     b: 0,
 };
 
-const initController = () => {
+const initController = (p) => {
     if (!device) {
+        p.clear()
         navigator.requestMIDIAccess().then(async (midiAccess) => {
             for (const entry of midiAccess.inputs) {
                 const { connection } = entry[1];
@@ -60,7 +61,7 @@ const initController = () => {
 };
 
 export const drawNovationMusic = (p, fft, mic) => {
-    initController();
+    initController(p);
     draw3DObjects(p, fft, mic);
 };
 
@@ -101,9 +102,9 @@ const draw3DObjects = (p, fft, mic) => {
     // const bpm = mic.getBPM()
     // console.log(bars)
 
-    const threeTwentyEnergy = frequencies.get(threeTwenty);
-    const oneSixtyEnergy = frequencies.get(threeTwenty);
-    const eightyEnergy = frequencies.get(threeTwenty);
+    const threeTwentyEnergy = frequencies.get(fourFourty);
+    const oneSixtyEnergy = frequencies.get(eighty);
+    const eightyEnergy = frequencies.get(oneK);
 
     // console.log(threeTwentyEnergy, oneSixtyEnergy, eightyEnergy)
     const duration = (p.millis() / 1000)
@@ -142,8 +143,8 @@ const draw3DObjects = (p, fft, mic) => {
     // );
     // p.fill(rgb.r, rgb.g, rgb.b, (transparencyFader / 4) % 255);
 
-    const rStroke = threeTwentyEnergy;
-    const gStroke = oneSixtyEnergy;
+    const rStroke = threeTwentyEnergy / 2;
+    const gStroke = oneSixtyEnergy / 2;
     const bStroke = eightyEnergy;
     // p.noFill();
     // p.lights()
@@ -156,19 +157,23 @@ const draw3DObjects = (p, fft, mic) => {
     // // p.pointLight(200, 200, 200, lightPosX, lightPosY, 50); //
     // p.shininess(50);
     // p.strokeWeight(8);
-    p.stroke(rgb.r, rgb.g, rgb.b, transparencyFader);
-
+    // setInterval(() => p.clear(), 1000)
+    // p.clear()
+    const transp = Number.parseInt(Math.random() * 255, 10)
     const rFill = frequencies.get(fourFourty);
     const gFill = frequencies.get(sixFourty);
     const bFill = frequencies.get(oneK);
     const transFil = frequencies.get(twoK);
-    p.fill(rFill, gFill, bFill, transparencyFader);
-
+    p.rotate(p.PI / 255 / transp)
+    p.fill(rFill, gFill, bFill, 32);
+    
     // console.log(frequencies.get(eighty));
     // const otherSizeFactor = sizeFactorFader;
     const otherSizeFactor = ((255 * 3) % (rStroke + gStroke + bStroke)) / 100;
-
-    p.sphere(Math.min(p.width / 3, p.height / 3) * otherSizeFactor, 8, 3);
+    // p.sphere(Math.min(p.width / 3, p.height / 3) * otherSizeFactor, 8, 3);
+    p.rotate(p.PI * duration / 10)
+    p.sphere(Math.min(rFill, gFill) * otherSizeFactor, 8, 3);
+    p.stroke(rgb.r, rgb.g, rgb.b, transp);
 };
 
 const objectMap = new Map([
